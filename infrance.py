@@ -1,14 +1,9 @@
 import torch
-from tokenizer import LlamaTokenizer
+from tokenizer import tokenizer
 from model import Llama2Model
-from huggingface_hub import hf_hub_download
+from rich.console import Console
 
-tokenizer_file = hf_hub_download(
-    repo_id="meta-llama/Llama-2-7b",
-    filename="tokenizer.model",
-    local_dir="Llama-2-7b"
-)
-tokenizer = LlamaTokenizer(tokenizer_file)
+console=Console()
 def text_to_token_ids(text, tokenizer):
     encoded = tokenizer.encode(text)
     encoded_tensor = torch.tensor(encoded).unsqueeze(0) # add batch dimension
@@ -55,13 +50,13 @@ def run_inference_examples():
             "The brave knight"
         ]
         
-        print("=" * 50)
+        console.print("=" * 50,style="bold green underline")
         print("LLAMA-2 INFERENCE EXAMPLES")
-        print("=" * 50)
+        console.print("=" * 50,style="bold green underline")
         
         for prompt in test_prompts:
             result = generate_text(
-                "best_llama_v2.pt", 
+                "training/best_llama_v2.pt", 
                 config, 
                 prompt, 
                 max_tokens=80, 
@@ -74,6 +69,6 @@ def run_inference_examples():
             print("-" * 30)
             
     except FileNotFoundError:
-        print("Model file 'best_llama_v2.pt' not found. Please train the model first.")
+        console.print("Model file 'training/best_llama_v2.pt' not found. Please train the model first.",style="error")
     except Exception as e:
-        print(f"Error during inference: {e}")
+        console.print(f"Error during inference: {e}",style="error")
