@@ -13,9 +13,7 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.head_dim = d_out // num_heads  # Reduce the projection dim to match desired output dim
 
-        ################################### NEW ###################################
-        # Set bias=False and dtype=dtype for all linear layers below
-        ###########################################################################
+       
         self.W_query = nn.Linear(d_in, d_out, bias=False, dtype=dtype)
         self.W_key = nn.Linear(d_in, d_out, bias=False, dtype=dtype)
         self.W_value = nn.Linear(d_in, d_out, bias=False, dtype=dtype)
@@ -23,7 +21,7 @@ class MultiHeadAttention(nn.Module):
         # self.dropout = nn.Dropout(dropout)
         self.register_buffer("mask", torch.triu(torch.ones(context_length, context_length), diagonal=1))
 
-        ################################### NEW ###################################
+       
         cos, sin = precompute_rope(head_dim=self.head_dim, context_length=context_length)
         self.register_buffer("cos", cos)
         self.register_buffer("sin", sin)

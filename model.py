@@ -32,6 +32,7 @@ class TransformerBlock(nn.Module):
 class Llama2Model(nn.Module):
     def __init__(self, cfg):
         super().__init__()
+        self.cfg=cfg
         self.tok_emb = nn.Embedding(cfg["vocab_size"], cfg["emb_dim"], dtype=cfg["dtype"])
         self.trf_blocks = nn.Sequential(
             *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])]) 
@@ -44,9 +45,8 @@ class Llama2Model(nn.Module):
         x = self.final_norm(x)
         x = self.out_head(x)
         return x
+    
 
-
-    @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
         for _ in range(max_new_tokens):
             idx_cond = idx[:, -self.cfg["context_length"]:]
@@ -60,3 +60,5 @@ class Llama2Model(nn.Module):
             probs = F.softmax(logits, dim=-1)
             idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, idx_next), dim=1)
+
+        return idx

@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset,DataLoader
-from ..tokenizer import tokenizer
-from .. config import LLAMA2_CONFIG_7B
+from tokenizer import tokenizer
+from config import LLAMA2_CONFIG_7B
 
 class TextData(Dataset):
     def __init__(self,txt, tokenizer,max_length,stride):
@@ -42,7 +42,7 @@ def create_dataloader(txt, batch_size=4, max_length=256,
     return dataloader
 with open("data/data.txt",'r') as f:
     text_data= f.read()
-train_ratio = 0.90
+train_ratio = 0.85
 split_idx = int(train_ratio * len(text_data))
 train_data = text_data[:split_idx]
 val_data = text_data[split_idx:]
@@ -56,7 +56,7 @@ train_loader = create_dataloader(
     max_length=LLAMA2_CONFIG_7B["context_length"],
     stride=LLAMA2_CONFIG_7B["context_length"],
     drop_last=True,
-    shuffle=True,
+    shuffle=False,
     num_workers=0
 )
 

@@ -14,13 +14,33 @@ def token_ids_to_text(token_ids, tokenizer):
     return tokenizer.decode(flat.tolist())
 
 
+def generate_text_sample(model, idx, max_tokens=100, temperature=0.8, top_k=50):
+    """Generate text from a prompt using trained model."""
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+    
+    
+    model = model.to(device)
+    model.eval()
+    
+    # Tokenize input
+    
+    
+    
+    # Generate
+    with torch.no_grad():
+        generated = model.generate(idx, max_tokens, temperature, top_k)
+    print(generated)
+    # Decode and return
+    result = token_ids_to_text(generated,tokenizer)
+    return result
 def generate_text(model_path, config, prompt, max_tokens=100, temperature=0.8, top_k=50):
     """Generate text from a prompt using trained model."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Load model
     model = Llama2Model(config)
-    model.load_state_dict(torch.load(model_path, map_location=device))
+    # model.load_state_dict(torch.load(model_path, map_location=device))
     model = model.to(device)
     model.eval()
     
@@ -33,7 +53,7 @@ def generate_text(model_path, config, prompt, max_tokens=100, temperature=0.8, t
         generated = model.generate(context, max_tokens, temperature, top_k)
     
     # Decode and return
-    result = token_ids_to_text.decode(generated)
+    result = token_ids_to_text(generated,tokenizer)
     return result
 
 def run_inference_examples():
@@ -41,7 +61,7 @@ def run_inference_examples():
     try:
         from model import LLAMA2_CONFIG_7B
         
-        config = LLAMA2_CONFIG_7B()
+        config = LLAMA2_CONFIG_7B
         
         test_prompts = [
             "Once upon a time",
@@ -69,6 +89,6 @@ def run_inference_examples():
             print("-" * 30)
             
     except FileNotFoundError:
-        console.print("Model file 'training/best_llama_v2.pt' not found. Please train the model first.",style="error")
+        console.print("Model file 'training/best_llama_v2.pt' not found. Please train the model first.",style="red")
     except Exception as e:
-        console.print(f"Error during inference: {e}",style="error")
+        console.print(f"red during inference: {e}",style="red",)

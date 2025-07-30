@@ -1,10 +1,10 @@
 import torch
-from infrance import text_to_token_ids,token_ids_to_text,generate_text
+from infrance import text_to_token_ids,token_ids_to_text,generate_text,generate_text_sample
 import time
-from ..model import Llama2Model
-from ..config import LLAMA2_CONFIG_7B
-from ..tokenizer import tokenizer
-from .data_loader import val_loader,train_loader
+from model import Llama2Model
+from config import LLAMA2_CONFIG_7B
+from tokenizer import tokenizer
+from training.data_loader import val_loader,train_loader
 start_time = time.time()
 
 def calc_loss_batch(input_batch, target_batch, model, device):
@@ -43,14 +43,14 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
 
 def generate_and_print_sample(model, tokenizer, device, start_context):
     model.eval()
-    context_size = model.pos_emb.weight.shape[0]
+    
     encoded = text_to_token_ids(start_context, tokenizer).to(device)
     with torch.no_grad():
-        token_ids = generate_text(
+        token_ids = generate_text_sample(
             model=model, idx=encoded,
-            max_new_tokens=50, context_size=context_size
+            max_tokens=50
         )
-    decoded_text = token_ids_to_text(token_ids, tokenizer)
+    decoded_text = token_ids
     print(decoded_text.replace("\n", " "))  # Compact print format
     model.train()
 
@@ -92,7 +92,7 @@ def train_model(model, train_loader, val_loader, optimizer, device, num_epochs,
 def trainer():
     device= "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(123)
-    model = Llama2Model(Llama2Model)
+    model = Llama2Model(LLAMA2_CONFIG_7B)
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
 
