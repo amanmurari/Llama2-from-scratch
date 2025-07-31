@@ -7,5 +7,8 @@ LLAMA2_CONFIG_7B = {
     "n_heads": 1,           # Number of attention heads
     "n_layers": 6,          # Number of layers
     "hidden_dim": 118,     # NEW: Size of the intermediate dimension in FeedForward
-    "dtype": torch.bfloat16  # NEW: Lower-precision dtype to reduce memory usage
+    "dtype": torch.bfloat16,  # NEW: Lower-precision dtype to reduce memory usage
+    "img_embd_dim":64,
+    "img_size":64,
+    "patch_size":4
 }

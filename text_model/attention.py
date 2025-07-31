@@ -1,14 +1,14 @@
 import torch
 from torch import nn
 from config import LLAMA2_CONFIG_7B
-from rope import precompute_rope,compute_rope
+from text_model.rope import precompute_rope,compute_rope
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_in, d_out, context_length, num_heads, dtype=None):  # ,dropout, num_heads, qkv_bias=False):
+    def __init__(self, d_in, d_out, context_length, num_heads, dtype=None,is_useimg=False):  # ,dropout, num_heads, qkv_bias=False):
         super().__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by n_heads"
-
+        self.is_useimg=is_useimg # if we use this attention in VIT
         self.d_out = d_out
         self.num_heads = num_heads
         self.head_dim = d_out // num_heads  # Reduce the projection dim to match desired output dim
@@ -37,11 +37,13 @@ class MultiHeadAttention(nn.Module):
         keys=keys.transpose(1,2)
         queries=queries.transpose(1,2)
         values=values.transpose(1,2)
-        keys=compute_rope(keys,self.cos,self.sin)
-        queries=compute_rope(queries,self.cos,self.sin)
+        if self.is_useimg:
+            keys=compute_rope(keys,self.cos,self.sin)
+            queries=compute_rope(queries,self.cos,self.sin)
         atten_sccr= queries @keys.transpose(2,3)
-        mask_bool= self.mask.bool()[:seq_len,:seq_len]
-        atten_sccr.masked_fill_(mask_bool,-torch.inf)
+        if self.is_useimg:
+            mask_bool= self.mask.bool()[:seq_len,:seq_len]
+            atten_sccr.masked_fill_(mask_bool,-torch.inf)
         atten_weg= torch.softmax(atten_sccr/keys.shape[-1]**.5,dim=-1)
         contxt_vec= (atten_weg@values).transpose(1,2)
         contxt_vec=contxt_vec.reshape(b,seq_len,self.d_out)
